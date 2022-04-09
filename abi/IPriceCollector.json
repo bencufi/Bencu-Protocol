@@ -1,0 +1,22 @@
+[
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "asset",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "price",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "setDirectPrice",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

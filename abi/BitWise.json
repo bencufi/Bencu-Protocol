@@ -1,0 +1,54 @@
+[
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "compSpeed",
+        "type": "uint256"
+      }
+    ],
+    "name": "split",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "borrowSpeed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "supplySpeed",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "borrowSpeed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "supplySpeed",
+        "type": "uint256"
+      }
+    ],
+    "name": "merge",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "compSpeed",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  }
+]

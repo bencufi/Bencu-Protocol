@@ -1,0 +1,40 @@
+{
+  "name": "compound-protocol",
+  "version": "0.2.1",
+  "description": "The Compound Money Market",
+  "main": "index.js",
+  "scripts": {
+    "compile": "./script/compile",
+    "console": "if node -v | grep -E \"v(12|13)\" > /dev/null; then flags=\"-n --experimental-repl-await\"; fi; npx $flags saddle console",
+    "coverage": "./script/coverage",
+    "deploy": "./scenario/script/repl -s ./scenario/scen/deploy.scen",
+    "lint": "./script/lint",
+    "repl": "./scenario/script/repl",
+    "profile": "yarn test tests/gasProfiler.js",
+    "test": "./script/test",
+    "test:prepare": "NO_RUN=true ./script/test",
+    "genabi": "rm -rf ABI && truffle compile && truffle-abi -d build/contracts/ -o abi",
+    "size": "truffle run contract-size"
+  },
+  "repository": "git@github.com:compound-finance/compound-protocol.git",
+  "author": "Compound Finance",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "arb-ethers-web3-bridge": "^0.7.3",
+    "bignumber.js": "8.0.1",
+    "eth-gas-reporter": "^0.2.22",
+    "jest-diff": "^24.9.0",
+    "jest-junit": "^6.4.0",
+    "solium": "^1.2.5",
+    "solparse": "^2.2.8",
+    "truffle-contract-size": "^2.0.1"
+  },
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^1.4.0",
+    "eth-saddle": "^0.1.17"
+  },
+  "resolutions": {
+    "scrypt.js": "https://registry.npmjs.org/@compound-finance/ethereumjs-wallet/-/ethereumjs-wallet-0.6.3.tgz",
+    "**/ganache-core": "https://github.com/compound-finance/ganache-core.git#jflatow/unbreak-fork"
+  }
+}
