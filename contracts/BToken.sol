@@ -228,10 +228,10 @@ contract BToken is CToken {
         require(cashBefore >= amount, "Insufficient liquidity");
         // 1. calculate fee
         uint fee = getFlashFeeInternal(token, amount);
-        // 2. transfer fund  to receiver
-        doFlashLoanTransferOut(address(uint160(address(receiver))), token, amount);
-        // 3. update totalBorrows
+        // 2. update totalBorrows
         totalBorrows = add_(totalBorrows, amount);
+        // 3. transfer fund  to receiver
+        doFlashLoanTransferOut(address(uint160(address(receiver))), token, amount);
         // 4. execute receiver's callback function
         require(receiver.onFlashLoan(msg.sender, token, amount, fee, data) ==
                 keccak256("ERC3156FlashBorrower.onFlashLoan"),

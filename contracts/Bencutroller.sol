@@ -137,6 +137,7 @@ contract Bencutroller is Comptroller {
     function flashLoanAllowed(address cToken, address to, uint256 flashLoanAmount) view public returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
         require(!borrowGuardianPaused[cToken], "paused");
+        require(qsConfig.whitelist(to), "!whitelist");
 
         if (!markets[cToken].isListed) {
             return uint(Error.MARKET_NOT_LISTED);
