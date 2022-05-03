@@ -85,7 +85,7 @@ contract Bencutroller is Comptroller {
       */
     function borrowAllowed(address cToken, address borrower, uint borrowAmount) external returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
-        require(!borrowGuardianPaused[cToken], "paused");
+        require(!borrowGuardianPaused[cToken], "p");
 
         if (!markets[cToken].isListed) {
             return uint(Error.MARKET_NOT_LISTED);
@@ -93,7 +93,7 @@ contract Bencutroller is Comptroller {
 
         if (!markets[cToken].accountMembership[borrower]) {
             // only cTokens may call borrowAllowed if borrower not in market
-            require(msg.sender == cToken, "!cToken");
+            require(msg.sender == cToken, "!c");
 
             // attempt to add borrower to the market
             Error err = addToMarketInternal(CToken(msg.sender), borrower);
@@ -114,7 +114,7 @@ contract Bencutroller is Comptroller {
         if (borrowCap != 0) {
             uint totalBorrows = CToken(cToken).totalBorrows();
             (MathError mathErr, uint nextTotalBorrows) = addUInt(totalBorrows, borrowAmount);
-            require(mathErr == MathError.NO_ERROR, "overflow");
+            require(mathErr == MathError.NO_ERROR, "o");
             require(nextTotalBorrows < borrowCap, "!cap");
         }
 
@@ -136,15 +136,15 @@ contract Bencutroller is Comptroller {
 
     function flashLoanAllowed(address cToken, address to, uint256 flashLoanAmount) view public returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
-        require(!borrowGuardianPaused[cToken], "paused");
-        require(qsConfig.whitelist(to), "!whitelist");
+        require(!borrowGuardianPaused[cToken], "p");
+        require(bencuConfig.whitelist(to), "!w");
 
         if (!markets[cToken].isListed) {
             return uint(Error.MARKET_NOT_LISTED);
         }
 
         uint flashLoanCap = bencuConfig.getFlashLoanCap(cToken);
-        require(flashLoanAmount <= flashLoanCap, "cap reached");
+        require(flashLoanAmount <= flashLoanCap, "c");
 
         to;
 
@@ -184,7 +184,7 @@ contract Bencutroller is Comptroller {
             require(mErr == MathError.NO_ERROR);
             (MathError mathErr, uint nextTotalSupplyUnderlying) = addUInt(totalSupplyUnderlying, mintAmount);
             require(mathErr == MathError.NO_ERROR);
-            require(nextTotalSupplyUnderlying <= supplyCap, ">cap");
+            require(nextTotalSupplyUnderlying <= supplyCap, ">c");
         }
 
         // Keep the flywheel moving
@@ -357,7 +357,7 @@ contract Bencutroller is Comptroller {
         address liquidator,
         address borrower,
         uint repayAmount) public returns (uint) {
-        require(bencuConfig.getCreditLimit(borrower) == 0 , "credit");
+        require(bencuConfig.getCreditLimit(borrower) == 0 , "c");
 
         return super.liquidateBorrowAllowed(cTokenBorrowed, cTokenCollateral, liquidator, borrower, repayAmount);
     }
@@ -368,7 +368,7 @@ contract Bencutroller is Comptroller {
         address liquidator,
         address borrower,
         uint seizeTokens) public returns (uint) {
-        require(bencuConfig.getCreditLimit(borrower) == 0 , "credit");
+        require(bencuConfig.getCreditLimit(borrower) == 0 , "c");
 
         return super.seizeAllowed(cTokenCollateral, cTokenBorrowed, liquidator, borrower, seizeTokens);
     }
@@ -386,7 +386,7 @@ contract Bencutroller is Comptroller {
         address payer,
         address borrower,
         uint repayAmount) public returns (uint) {
-        require(bencuConfig.getCreditLimit(borrower) == 0 || payer == borrower, "Payer != borrower");
+        require(bencuConfig.getCreditLimit(borrower) == 0 || payer == borrower, "P != b");
 
         return super.repayBorrowAllowed(cToken, payer, borrower, repayAmount);
     }
@@ -409,6 +409,10 @@ contract Bencutroller is Comptroller {
         emit MarketListed(cToken);
 
         return uint(Error.NO_ERROR);
+    }
+
+    function redeemVerify(address cToken, address redeemer, uint redeemAmount, uint redeemTokens) external {
+       require(!bencuConfig.isBlocked(redeemer), "b");
     }
 
     /**

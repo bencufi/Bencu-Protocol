@@ -172,7 +172,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         CToken cToken = CToken(cTokenAddress);
         /* Get sender tokensHeld and amountOwed underlying from the cToken */
         (uint oErr, uint tokensHeld, uint amountOwed, ) = cToken.getAccountSnapshot(msg.sender);
-        require(oErr == 0, "exitMarket: getAccountSnapshot failed"); // semi-opaque error code
+        require(oErr == 0, "!Snapshot"); // semi-opaque error code
 
         /* Fail if the sender has a borrow balance */
         if (amountOwed != 0) {
@@ -401,7 +401,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      */
     function transferAllowed(address cToken, address src, address dst, uint transferTokens) external returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
-        require(!transferGuardianPaused, "paused");
+        require(!transferGuardianPaused, "p");
 
         // Currently the only consideration is whether or not
         //  the src is allowed to redeem this many tokens
@@ -695,7 +695,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     function _addMarketInternal(address cToken) internal {
         for (uint i = 0; i < allMarkets.length; i ++) {
-            require(allMarkets[i] != CToken(cToken), "market already added");
+            require(allMarkets[i] != CToken(cToken), "added");
         }
         allMarkets.push(CToken(cToken));
     }
@@ -708,7 +708,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      */
     function _setBorrowFactor(CToken cToken, uint newBorrowFactor) external {
         require(msg.sender == admin, "!admin");
-        require(newBorrowFactor > 0 && newBorrowFactor <= borrowFactorMaxMantissa, "!borrowFactor");
+        require(newBorrowFactor > 0 && newBorrowFactor <= borrowFactorMaxMantissa, "!b");
 
         markets[address(cToken)].borrowFactorMantissa = newBorrowFactor;
         emit NewBorrowFactor(cToken, newBorrowFactor);
@@ -738,7 +738,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     function _setMintPaused(CToken cToken, bool state) external returns (bool) {
         require(markets[address(cToken)].isListed, "!listed");
-        require(msg.sender == pauseGuardian || msg.sender == admin, "!admin");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "!a");
 
         mintGuardianPaused[address(cToken)] = state;
         emit ActionPaused(cToken, "Mint", state);
@@ -747,7 +747,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     function _setBorrowPaused(CToken cToken, bool state) external returns (bool) {
         require(markets[address(cToken)].isListed, "!listed");
-        require(msg.sender == pauseGuardian || msg.sender == admin, "!admin");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "!a");
 
         borrowGuardianPaused[address(cToken)] = state;
         emit ActionPaused(cToken, "Borrow", state);
@@ -755,7 +755,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     function _setTransferPaused(bool state) public returns (bool) {
-        require(msg.sender == pauseGuardian || msg.sender == admin, "!admin");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "!a");
 
         transferGuardianPaused = state;
         emit ActionPaused("Transfer", state);
@@ -763,7 +763,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     function _setSeizePaused(bool state) external returns (bool) {
-        require(msg.sender == pauseGuardian || msg.sender == admin, "!admin");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "!a");
 
         seizeGuardianPaused = state;
         emit ActionPaused("Seize", state);
@@ -771,8 +771,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     function _become(Unitroller unitroller) public {
-        require(msg.sender == unitroller.admin(), "!admin");
-        require(unitroller._acceptImplementation() == 0, "!authorized");
+        require(msg.sender == unitroller.admin(), "!a");
+        require(unitroller._acceptImplementation() == 0, "!auth");
     }
 
     /**
@@ -872,7 +872,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     function claimComp(address[] memory holders, CToken[] memory cTokens, bool borrowers, bool suppliers) public {
         for (uint i = 0; i < cTokens.length; i++) {
             CToken cToken = cTokens[i];
-            require(markets[address(cToken)].isListed, "!listed");
+            require(markets[address(cToken)].isListed, "!l");
             if (borrowers == true) {
                 Exp memory borrowIndex = Exp({mantissa: cToken.borrowIndex()});
                 updateCompBorrowIndex(address(cToken), borrowIndex);
@@ -893,8 +893,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
     function _addCompMarketInternal(address cToken) internal {
         Market storage market = markets[cToken];
-        require(market.isListed == true, "!listed");
-        require(market.isComped == false, "already added");
+        require(market.isListed == true, "!l");
+        require(market.isComped == false, "a");
 
         market.isComped = true;
         emit MarketComped(CToken(cToken), true);
@@ -902,14 +902,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         if (compSupplyState[cToken].index == 0 && compSupplyState[cToken].block == 0) {
             compSupplyState[cToken] = CompMarketState({
                 index: compInitialIndex,
-                block: safe32(getBlockNumber(), "exceeds 32 bits")
+                block: safe32(getBlockNumber(), "> 32 bits")
             });
         }
 
         if (compBorrowState[cToken].index == 0 && compBorrowState[cToken].block == 0) {
             compBorrowState[cToken] = CompMarketState({
                 index: compInitialIndex,
-                block: safe32(getBlockNumber(), "exceeds 32 bits")
+                block: safe32(getBlockNumber(), "> 32 bits")
             });
         }
     }

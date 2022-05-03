@@ -64,8 +64,8 @@ module.exports = {
     // }
 
       metistest: {
-          provider: () => new HDWalletProvider(mnemonic, `wss://stardust-ws.metis.io/`),
-          // provider: () => new HDWalletProvider(mnemonic, `https://stardust.metis.io/?owner=588`),
+          // provider: () => new HDWalletProvider(mnemonic, `wss://stardust-ws.metis.io/`),
+          provider: () => new HDWalletProvider(mnemonic, `https://stardust.metis.io/?owner=588`),
           network_id: 588,
           production: false,
           timeoutBlocks: 200,
@@ -76,10 +76,11 @@ module.exports = {
       },
 
       metis: {
-          provider: () => new HDWalletProvider(mnemonic, `wss://andromeda-ws.metis.io`),
+          provider: () => new HDWalletProvider(mnemonic, `https://andromeda.metis.io/?owner=1088`),
+          // provider: () => new HDWalletProvider(mnemonic, `wss://andromeda-ws.metis.io`),
           network_id: "1088",   // This network is yours, in the cloud.
           timeoutBlocks: 200,
-          gasPrice: 12000000000,
+          gasPrice: 17000000000,
           gas: 55000000,
           skipDryRun: true,
           pollingInterval: 16000,
