@@ -4,7 +4,7 @@ import "./compound/Unitroller.sol";
 import "./compound/Exponential.sol";
 import "./Ownable.sol";
 
-contract BencuConfig is Ownable, Exponential {
+contract TenderConfig is Ownable, Exponential {
     address public compToken;
     uint public safetyVaultRatio = 0.01e18;
     address public safetyVault;
@@ -68,13 +68,13 @@ contract BencuConfig is Ownable, Exponential {
         _;
     }
 
-    constructor(BencuConfig previousQsConfig) public {
+    constructor(TenderConfig previousTenderConfig) public {
         safetyGuardian = msg.sender;
-        if (address(previousQsConfig) == address(0x0)) return;
+        if (address(previousTenderConfig) == address(0x0)) return;
 
-        compToken = previousQsConfig.compToken();
-        safetyVaultRatio = previousQsConfig.safetyVaultRatio();
-        safetyVault = previousQsConfig.safetyVault();
+        compToken = previousTenderConfig.compToken();
+        safetyVaultRatio = previousTenderConfig.safetyVaultRatio();
+        safetyVault = previousTenderConfig.safetyVault();
     }
 
     /**

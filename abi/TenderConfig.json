@@ -2,8 +2,8 @@
   {
     "inputs": [
       {
-        "internalType": "contract BencuConfig",
-        "name": "previousQsConfig",
+        "internalType": "contract TenderConfig",
+        "name": "previousTenderConfig",
         "type": "address"
       }
     ],

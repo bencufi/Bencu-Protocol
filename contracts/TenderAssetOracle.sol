@@ -2,14 +2,14 @@ pragma solidity ^0.5.16;
 
 import "./ChainlinkAggregatorV3Interface.sol";
 import "./Ownable.sol";
-import "./BencuPriceOracle.sol";
+import "./TenderPriceOracle.sol";
 
-contract BencuAssetOracle is ChainlinkAggregatorV3Interface, Ownable {
+contract TenderAssetOracle is ChainlinkAggregatorV3Interface, Ownable {
     using SafeMath for uint;
 
     uint8 private decimals_;
     string private description_;
-    BencuPriceOracle public baseOracle;
+    TenderPriceOracle public baseOracle;
 
     address public asset;
 
@@ -28,7 +28,7 @@ contract BencuAssetOracle is ChainlinkAggregatorV3Interface, Ownable {
     constructor(
         uint8 _decimals,
         string memory _description,
-        BencuPriceOracle _baseOracle,
+        TenderPriceOracle _baseOracle,
         address _asset) public {
         require(_asset != address(0), "asset address is zero");
         decimals_ = _decimals;
@@ -87,7 +87,7 @@ contract BencuAssetOracle is ChainlinkAggregatorV3Interface, Ownable {
         return getRoundData(0);
     }
 
-    function setBaseOracle(BencuPriceOracle _baseOracle) external onlyOwner {
+    function setBaseOracle(TenderPriceOracle _baseOracle) external onlyOwner {
         baseOracle = _baseOracle;
     }
 }

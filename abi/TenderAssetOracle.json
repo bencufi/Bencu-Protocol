@@ -12,7 +12,7 @@
         "type": "string"
       },
       {
-        "internalType": "contract BencuPriceOracle",
+        "internalType": "contract TenderPriceOracle",
         "name": "_baseOracle",
         "type": "address"
       },
@@ -100,7 +100,7 @@
     "name": "baseOracle",
     "outputs": [
       {
-        "internalType": "contract BencuPriceOracle",
+        "internalType": "contract TenderPriceOracle",
         "name": "",
         "type": "address"
       }
@@ -273,7 +273,7 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract BencuPriceOracle",
+        "internalType": "contract TenderPriceOracle",
         "name": "_baseOracle",
         "type": "address"
       }

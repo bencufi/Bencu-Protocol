@@ -1,7 +1,6 @@
 pragma solidity ^0.5.16;
 
 import "./compound/CToken.sol";
-import "./BToken.sol";
 import "./IWETH.sol";
 
 /**
@@ -9,7 +8,7 @@ import "./IWETH.sol";
  * @notice CTokens which wrap an EIP-20 underlying
  * @author Compound
  */
-contract CWrappedNative is BToken, CErc20Storage {
+contract CWrappedNative is CToken, CErc20Storage {
     /**
      * @notice Initialize the new money market
      * @param underlying_ The address of the underlying asset
@@ -105,6 +104,15 @@ contract CWrappedNative is BToken, CErc20Storage {
         (uint err,) = liquidateBorrowInternal(borrower, msg.value, cTokenCollateral);
         requireNoError(err, "liquidateBorrow failed");
     }
+
+    /**
+     * @notice A public function to sweep accidental ERC-20 transfers to this contract. Tokens are sent to admin (timelock)
+     * @param token The address of the ERC-20 token to sweep
+     */
+    function sweepToken(EIP20NonStandardInterface token) external {
+    	require(address(token) != underlying, "CErc20::sweepToken: can not sweep underlying token");
+    	uint256 balance = token.balanceOf(address(this));
+    	token.transfer(admin, balance);
 
     /**
      * @notice The sender adds to reserves.

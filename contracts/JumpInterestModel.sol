@@ -5,9 +5,9 @@ import "./compound/SafeMath.sol";
 
 /**
   * @title Derived from Compound's JumpRateModel Contract
-  * @author Bencu
+  * @author Tender
   */
-contract CommonJumpInterestModel is InterestRateModel {
+contract JumpInterestModel is InterestRateModel {
     using SafeMath for uint;
 
     event NewInterestParams(uint blocksPerYear, uint baseRatePerBlock, uint multiplierPerBlock, uint jumpMultiplierPerBlock, uint kink);

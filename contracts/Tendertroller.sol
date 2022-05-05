@@ -2,18 +2,18 @@ pragma solidity ^0.5.16;
 
 import "./compound/Comptroller.sol";
 import "./compound/EIP20Interface.sol";
-import "./BencuConfig.sol";
+import "./TenderConfig.sol";
 
-contract Bencutroller is Comptroller {
+contract Tendertroller is Comptroller {
     /// @notice Emitted when an admin delists a market
     event MarketDelisted(CToken cToken);
 
-    BencuConfig public bencuConfig;
+    TenderConfig public tenderConfig;
 
-    function _setBencuConfig(BencuConfig _bencuConfig) public {
+    function _setTenderConfig(TenderConfig _tenderConfig) public {
         require(msg.sender == admin);
 
-        bencuConfig = _bencuConfig;
+        tenderConfig = _tenderConfig;
     }
 
     /**
@@ -54,11 +54,11 @@ contract Bencutroller is Comptroller {
 
 
     function getCompAddress() public view returns (address) {
-        return bencuConfig.compToken();
+        return tenderConfig.compToken();
     }
     
     function calculateSeizeTokenAllocation(uint _seizeTokenAmount) public view returns(uint liquidatorAmount, uint safetyVaultAmount) {
-        return bencuConfig.calculateSeizeTokenAllocation(_seizeTokenAmount, liquidationIncentiveMantissa);
+        return tenderConfig.calculateSeizeTokenAllocation(_seizeTokenAmount, liquidationIncentiveMantissa);
     }
     
     function transferComp(address user, uint userAccrued, uint threshold) internal returns (uint) {
@@ -67,9 +67,9 @@ contract Bencutroller is Comptroller {
             EIP20Interface comp = EIP20Interface(compAddress);
             uint compRemaining = comp.balanceOf(address(this));
             if (userAccrued <= compRemaining) {
-                (uint userAmount, uint governanceAmount) = bencuConfig.getCompAllocation(user, userAccrued);
+                (uint userAmount, uint governanceAmount) = tenderConfig.getCompAllocation(user, userAccrued);
                 if (userAmount > 0) comp.transfer(user, userAmount);
-                if (governanceAmount > 0) comp.transfer(bencuConfig.safetyVault(), governanceAmount);
+                if (governanceAmount > 0) comp.transfer(tenderConfig.safetyVault(), governanceAmount);
                 return 0;
             }
         }
@@ -109,7 +109,7 @@ contract Bencutroller is Comptroller {
             return uint(Error.PRICE_ERROR);
         }
 
-        uint borrowCap = bencuConfig.getBorrowCap(cToken);
+        uint borrowCap = tenderConfig.getBorrowCap(cToken);
         // Borrow cap of 0 corresponds to unlimited borrowing
         if (borrowCap != 0) {
             uint totalBorrows = CToken(cToken).totalBorrows();
@@ -137,13 +137,13 @@ contract Bencutroller is Comptroller {
     function flashLoanAllowed(address cToken, address to, uint256 flashLoanAmount) view public returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
         require(!borrowGuardianPaused[cToken], "p");
-        require(bencuConfig.whitelist(to), "!w");
+        require(tenderConfig.whitelist(to), "!w");
 
         if (!markets[cToken].isListed) {
             return uint(Error.MARKET_NOT_LISTED);
         }
 
-        uint flashLoanCap = bencuConfig.getFlashLoanCap(cToken);
+        uint flashLoanCap = tenderConfig.getFlashLoanCap(cToken);
         require(flashLoanAmount <= flashLoanCap, "c");
 
         to;
@@ -152,7 +152,7 @@ contract Bencutroller is Comptroller {
     }
 
     function getFlashLoanCap(address cToken) view external returns (uint) {
-        return bencuConfig.getFlashLoanCap(cToken);
+        return tenderConfig.getFlashLoanCap(cToken);
     }
 
     /**
@@ -163,7 +163,7 @@ contract Bencutroller is Comptroller {
      * @return 0 if the mint is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
     function mintAllowed(address cToken, address minter, uint mintAmount) external returns (uint) {
-        require(!bencuConfig.isBlocked(minter));
+        require(!tenderConfig.isBlocked(minter));
         // Pausing is a very serious situation - we revert to sound the alarms
         require(!mintGuardianPaused[cToken]);
 
@@ -175,7 +175,7 @@ contract Bencutroller is Comptroller {
             return uint(Error.MARKET_NOT_LISTED);
         }
 
-        uint supplyCap = bencuConfig.getSupplyCap(cToken);
+        uint supplyCap = tenderConfig.getSupplyCap(cToken);
 
         // Supply cap of 0 corresponds to unlimited borrowing
         if (supplyCap != 0) {
@@ -261,7 +261,7 @@ contract Bencutroller is Comptroller {
         uint borrowAmount) internal view returns (Error, uint, uint) {
 
         // If credit limit is set to MAX, no need to check account liquidity.
-        if (bencuConfig.getCreditLimit(account) == uint(-1)) {
+        if (tenderConfig.getCreditLimit(account) == uint(-1)) {
             return (Error.NO_ERROR, uint(-1), 0);
         }
 
@@ -331,8 +331,8 @@ contract Bencutroller is Comptroller {
         }
 
         // If credit limit is set, no need to consider collateral.
-        if (bencuConfig.getCreditLimit(account) > 0) {
-            vars.sumCollateral = bencuConfig.getCreditLimit(account);
+        if (tenderConfig.getCreditLimit(account) > 0) {
+            vars.sumCollateral = tenderConfig.getCreditLimit(account);
         }
 
         // These are safe, as the underflow condition is checked first
@@ -357,7 +357,7 @@ contract Bencutroller is Comptroller {
         address liquidator,
         address borrower,
         uint repayAmount) public returns (uint) {
-        require(bencuConfig.getCreditLimit(borrower) == 0 , "c");
+        require(tenderConfig.getCreditLimit(borrower) == 0 , "c");
 
         return super.liquidateBorrowAllowed(cTokenBorrowed, cTokenCollateral, liquidator, borrower, repayAmount);
     }
@@ -368,7 +368,7 @@ contract Bencutroller is Comptroller {
         address liquidator,
         address borrower,
         uint seizeTokens) public returns (uint) {
-        require(bencuConfig.getCreditLimit(borrower) == 0 , "c");
+        require(tenderConfig.getCreditLimit(borrower) == 0 , "c");
 
         return super.seizeAllowed(cTokenCollateral, cTokenBorrowed, liquidator, borrower, seizeTokens);
     }
@@ -386,7 +386,7 @@ contract Bencutroller is Comptroller {
         address payer,
         address borrower,
         uint repayAmount) public returns (uint) {
-        require(bencuConfig.getCreditLimit(borrower) == 0 || payer == borrower, "P != b");
+        require(tenderConfig.getCreditLimit(borrower) == 0 || payer == borrower, "P != b");
 
         return super.repayBorrowAllowed(cToken, payer, borrower, repayAmount);
     }
@@ -412,7 +412,7 @@ contract Bencutroller is Comptroller {
     }
 
     function redeemVerify(address cToken, address redeemer, uint redeemAmount, uint redeemTokens) external {
-       require(!bencuConfig.isBlocked(redeemer), "b");
+       require(!tenderConfig.isBlocked(redeemer), "b");
     }
 
     /**
@@ -436,7 +436,7 @@ contract Bencutroller is Comptroller {
     }
 
     function safetyGuardian() external view returns (address) {
-        return bencuConfig.safetyGuardian();
+        return tenderConfig.safetyGuardian();
     }
 
 }

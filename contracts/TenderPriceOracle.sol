@@ -7,7 +7,7 @@ import "./BToken.sol";
 import "./compound/SafeMath.sol";
 import "./ChainlinkAggregatorV3Interface.sol";
 
-contract BencuPriceOracle is PriceOracle, IPriceCollector {
+contract TenderPriceOracle is PriceOracle, IPriceCollector {
     struct ErrorInfo {
         uint timestamp;
         uint previousPrice;

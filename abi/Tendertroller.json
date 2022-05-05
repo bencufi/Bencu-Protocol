@@ -691,10 +691,10 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "bencuConfig",
+    "name": "tenderConfig",
     "outputs": [
       {
-        "internalType": "contract BencuConfig",
+        "internalType": "contract TenderConfig",
         "name": "",
         "type": "address"
       }
@@ -1561,12 +1561,12 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract BencuConfig",
-        "name": "_bencuConfig",
+        "internalType": "contract TenderConfig",
+        "name": "_tenderConfig",
         "type": "address"
       }
     ],
-    "name": "_setBencuConfig",
+    "name": "_setTenderConfig",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

@@ -1,7 +1,7 @@
 pragma solidity ^0.5.16;
 
 import "./compound/CToken.sol";
-import "./Bencutroller.sol";
+import "./Tendertroller.sol";
 import "./IERC3156FlashBorrower.sol";
 
 contract BToken is CToken {
@@ -28,10 +28,10 @@ contract BToken is CToken {
         LiquidationLocalVars memory vars;
         MathError mathErr;
 
-        BencuConfig bencuConfig = Bencutroller(address(comptroller)).bencuConfig();
+        TenderConfig tenderConfig = Tendertroller(address(comptroller)).tenderConfig();
         uint liquidationIncentive = comptroller.getLiquidationIncentive(seizerToken);
-        (vars.liquidatorSeizeTokens, vars.safetyVaultTokens) = bencuConfig.calculateSeizeTokenAllocation(seizeTokens, liquidationIncentive);
-        address safetyVault = bencuConfig.safetyVault();
+        (vars.liquidatorSeizeTokens, vars.safetyVaultTokens) = tenderConfig.calculateSeizeTokenAllocation(seizeTokens, liquidationIncentive);
+        address safetyVault = tenderConfig.safetyVault();
         /*
          * We calculate the new borrower and liquidator token balances, failing on underflow/overflow:
          *  borrowerTokensNew = accountTokens[borrower] - seizeTokens
@@ -192,7 +192,7 @@ contract BToken is CToken {
      */
     function maxFlashLoan(address token) external view returns (uint256) {
         validateFlashloanToken(token);
-        return Bencutroller(address(comptroller)).getFlashLoanCap(address(this));
+        return Tendertroller(address(comptroller)).getFlashLoanCap(address(this));
     }
 
     /**
@@ -208,7 +208,7 @@ contract BToken is CToken {
 
     function getFlashFeeInternal(address token, uint256 amount) internal view returns (uint256) {
         token;
-        return Bencutroller(address(comptroller)).bencuConfig().getFlashFee(msg.sender, address(this), amount);
+        return Tendertroller(address(comptroller)).tenderConfig().getFlashFee(msg.sender, address(this), amount);
     }
 
     /**
@@ -222,7 +222,7 @@ contract BToken is CToken {
         require(accrueInterest() == uint(Error.NO_ERROR), "Accrue interest failed");
         validateFlashloanToken(token);
         
-        Bencutroller(address(comptroller)).flashLoanAllowed(address(this), address(receiver), amount);
+        Tendertroller(address(comptroller)).flashLoanAllowed(address(this), address(receiver), amount);
 
         uint cashBefore = getCashPrior();
         require(cashBefore >= amount, "Insufficient liquidity");
