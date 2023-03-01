@@ -7,6 +7,7 @@ const CompoundLens = artifacts.require("CompoundLens");
 const BencuPriceOracle = artifacts.require("BencuPriceOracle");
 const BencuConfig = artifacts.require("BencuConfig");
 const Maximillion = artifacts.require("Maximillion");
+const BlockNumber = artifacts.require("BlockNumber");
 
 // Mock Tokens
 const TetherToken = artifacts.require("TetherToken");
@@ -25,7 +26,17 @@ module.exports = async function(deployer, network) {
     await deployer.deploy(Unitroller);
     await deployer.deploy(Bencutroller);
     await deployer.deploy(CompoundLens);
-    await deployer.deploy(BencuConfig, "0x0000000000000000000000000000000000000000");
+
+    if (network == "metistest" || network == "metis") {
+        await deployer.deploy(BencuConfig,
+            "0x0000000000000000000000000000000000000000", "0x4200000000000000000000000000000000000013");
+        addressFactory["BlockNumber"] = "0x4200000000000000000000000000000000000013";
+    } else {
+        await deployer.deploy(BlockNumber);
+        await deployer.deploy(BencuConfig,
+            "0x0000000000000000000000000000000000000000", BlockNumber.address);
+        addressFactory["BlockNumber"] = BlockNumber.address;
+    }
 
     addressFactory["Bencutroller"] = Unitroller.address;
     addressFactory["BencuConfig"] = BencuConfig.address;

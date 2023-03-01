@@ -223,10 +223,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @dev Function to simply retrieve block number
      *  This exists mainly for inheriting test contracts to stub this result.
      */
-    function getBlockNumber() internal view returns (uint) {
-        //return iOVM_L1BlockNumber(0x4200000000000000000000000000000000000013).getL1BlockNumber();
-        return block.number;
-    }
+    function getBlockNumber() internal view returns (uint);
 
     /**
      * @notice Returns the current per-block borrow interest rate for this cToken

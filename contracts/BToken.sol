@@ -39,6 +39,11 @@ contract BToken is CToken {
         }
     }
 
+    function getBlockNumber() internal view returns (uint) {
+        BencuConfig bencuConfig = Bencutroller(address(comptroller)).bencuConfig();
+        return iOVM_L1BlockNumber(bencuConfig.blockNumber()).getL1BlockNumber();
+    }
+
     function transferTokens(address spender, address src, address dst, uint tokens) internal returns (uint) {
         uint errorCode = super.transferTokens(spender, src, dst, tokens);
         if (errorCode == uint(Error.NO_ERROR)) {

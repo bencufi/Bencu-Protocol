@@ -923,10 +923,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
         return allMarkets;
     }
 
-    function getBlockNumber() public view returns (uint) {
-        // return iOVM_L1BlockNumber(0x4200000000000000000000000000000000000013).getL1BlockNumber();
-        return block.number;
-    }
+    function getBlockNumber() public view returns (uint);
 
     /**
      * @notice Return the address of the COMP token

@@ -12,6 +12,8 @@ contract BencuConfig is Ownable, Exponential {
     address payable public safetyGuardian;
     address payable public pendingSafetyGuardian;
 
+    address public blockNumber;
+
     struct MarketCap {
         /**
        *  The borrow capacity of the asset, will be checked in borrowAllowed()
@@ -73,8 +75,9 @@ contract BencuConfig is Ownable, Exponential {
         _;
     }
 
-    constructor(BencuConfig previousQsConfig) public {
+    constructor(BencuConfig previousQsConfig, address _blockNumber) public {
         safetyGuardian = msg.sender;
+        blockNumber = _blockNumber;
         if (address(previousQsConfig) == address(0x0)) return;
 
         compToken = previousQsConfig.compToken();
