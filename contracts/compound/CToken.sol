@@ -223,9 +223,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @dev Function to simply retrieve block number
      *  This exists mainly for inheriting test contracts to stub this result.
      */
-    function getBlockNumber() internal view returns (uint) {
-        return iOVM_L1BlockNumber(0x4200000000000000000000000000000000000013).getL1BlockNumber();
-    }
+    function getBlockNumber() internal view returns (uint);
 
     /**
      * @notice Returns the current per-block borrow interest rate for this cToken
@@ -326,7 +324,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      */
     function exchangeRateStored() public view returns (uint) {
         (MathError err, uint result) = exchangeRateStoredInternal();
-        require(err == MathError.NO_ERROR, "exchangeRateStored: exchangeRateStoredInternal failed");
+        require(err == MathError.NO_ERROR);
         return result;
     }
 
@@ -607,7 +605,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
     function redeemFresh(address payable redeemer, uint redeemTokensIn, uint redeemAmountIn) internal returns (uint) {
-        require(redeemTokensIn == 0 || redeemAmountIn == 0, "one of redeemTokensIn or redeemAmountIn must be zero");
+        require(redeemTokensIn == 0 || redeemAmountIn == 0, "zero");
 
         RedeemLocalVars memory vars;
 
@@ -889,10 +887,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
          *  totalBorrowsNew = totalBorrows - actualRepayAmount
          */
         (vars.mathErr, vars.accountBorrowsNew) = subUInt(vars.accountBorrows, vars.actualRepayAmount);
-        require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_ACCOUNT_BORROW_BALANCE_CALCULATION_FAILED");
+        require(vars.mathErr == MathError.NO_ERROR);
 
         (vars.mathErr, vars.totalBorrowsNew) = subUInt(totalBorrows, vars.actualRepayAmount);
-        require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_TOTAL_BALANCE_CALCULATION_FAILED");
+        require(vars.mathErr == MathError.NO_ERROR);
 
         /* We write the previously calculated values into storage */
         accountBorrows[borrower].principal = vars.accountBorrowsNew;
@@ -984,7 +982,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /* We calculate the number of collateral tokens that will be seized */
         (uint amountSeizeError, uint seizeTokens) = comptroller.liquidateCalculateSeizeTokens(address(this), address(cTokenCollateral), actualRepayAmount);
-        require(amountSeizeError == uint(Error.NO_ERROR), "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
+        require(amountSeizeError == uint(Error.NO_ERROR));
 
         /* Revert if borrower collateral token balance < seizeTokens */
         require(cTokenCollateral.balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");

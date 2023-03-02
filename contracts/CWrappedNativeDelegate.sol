@@ -26,7 +26,7 @@ contract CWrappedNativeDelegate is CWrappedNative, CDelegateInterface {
             implementation = address(0);
         }
 
-        require(msg.sender == admin, "!admin");
+        require(msg.sender == admin);
         
         uint256 balance = address(this).balance;
         if (balance > 0) {
@@ -43,6 +43,6 @@ contract CWrappedNativeDelegate is CWrappedNative, CDelegateInterface {
             implementation = address(0);
         }
 
-        require(msg.sender == admin, "!admin");
+        require(msg.sender == admin);
     }
 }

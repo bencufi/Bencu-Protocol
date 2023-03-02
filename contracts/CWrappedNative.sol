@@ -44,7 +44,7 @@ contract CWrappedNative is BToken, CErc20Storage {
      */
     function mint() external payable {
         (uint err,) = mintInternal(msg.value);
-        requireNoError(err, "mint failed");
+        requireNoError(err, "mint");
     }
     /**
      * @notice Sender redeems cTokens in exchange for the underlying asset
@@ -81,7 +81,7 @@ contract CWrappedNative is BToken, CErc20Storage {
      */
     function repayBorrow() external payable {
         (uint err,) = repayBorrowInternal(msg.value);
-        requireNoError(err, "repayBorrow failed");
+        requireNoError(err, "repay");
     }
 
     /**
@@ -91,7 +91,7 @@ contract CWrappedNative is BToken, CErc20Storage {
      */
     function repayBorrowBehalf(address borrower) external payable {
         (uint err,) = repayBorrowBehalfInternal(borrower, msg.value);
-        requireNoError(err, "repayBorrowBehalf failed");
+        requireNoError(err, "repayBehalf");
     }
 
     /**
@@ -103,7 +103,7 @@ contract CWrappedNative is BToken, CErc20Storage {
      */
     function liquidateBorrow(address borrower, CToken cTokenCollateral) external payable {
         (uint err,) = liquidateBorrowInternal(borrower, msg.value, cTokenCollateral);
-        requireNoError(err, "liquidateBorrow failed");
+        requireNoError(err, "liquidate");
     }
 
     /**

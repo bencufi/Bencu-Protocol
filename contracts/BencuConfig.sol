@@ -3,6 +3,7 @@ pragma solidity ^0.5.16;
 import "./compound/Unitroller.sol";
 import "./compound/Exponential.sol";
 import "./Ownable.sol";
+import "./IGaugeController.sol";
 
 contract BencuConfig is Ownable, Exponential {
     address public compToken;
@@ -10,6 +11,8 @@ contract BencuConfig is Ownable, Exponential {
     address public safetyVault;
     address payable public safetyGuardian;
     address payable public pendingSafetyGuardian;
+
+    address public blockNumber;
 
     struct MarketCap {
         /**
@@ -39,6 +42,8 @@ contract BencuConfig is Ownable, Exponential {
     mapping(address => uint) public creditLimits;
     uint public flashLoanFeeRatio = 0.0001e18;
 
+    IGaugeController public gaugeController;
+
     event NewCompToken(address oldCompToken, address newCompToken);
     event NewSafetyVault(address oldSafetyVault, address newSafetyVault);
     event NewSafetyVaultRatio(uint oldSafetyVaultRatio, uint newSafetyVault);
@@ -63,13 +68,16 @@ contract BencuConfig is Ownable, Exponential {
 
     event NewSafetyGuardian(address oldSafetyGuardian, address newSafetyGuardian);
 
+    event NewGaugeController(address oldLiquidityGauge, address newLiquidityGauage);
+
     modifier onlySafetyGuardian {
         require(msg.sender == safetyGuardian, "Safety guardian required.");
         _;
     }
 
-    constructor(BencuConfig previousQsConfig) public {
+    constructor(BencuConfig previousQsConfig, address _blockNumber) public {
         safetyGuardian = msg.sender;
+        blockNumber = _blockNumber;
         if (address(previousQsConfig) == address(0x0)) return;
 
         compToken = previousQsConfig.compToken();
@@ -273,6 +281,12 @@ contract BencuConfig is Ownable, Exponential {
         flashLoanFeeRatio = _feeRatio;
 
         emit FlashLoanFeeRatioChanged(oldFeeRatio, flashLoanFeeRatio);
+    }
+
+    function _setGaugeController(IGaugeController _gaugeController) external onlySafetyGuardian {
+        emit NewGaugeController(address(gaugeController), address(_gaugeController));
+
+        gaugeController = _gaugeController;
     }
 
     function isContract(address account) internal view returns (bool) {

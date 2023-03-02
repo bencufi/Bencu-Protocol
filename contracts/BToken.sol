@@ -13,6 +13,46 @@ contract BToken is CToken {
         uint liquidatorSeizeTokens;
     }
 
+    function mintFresh(address minter, uint mintAmount) internal returns (uint, uint) {
+        (uint mintError, uint actualMintAmount) = super.mintFresh(minter, mintAmount);
+
+        if (mintError == uint(Error.NO_ERROR)) {
+            notifySavingsChange(minter);
+        }
+        return (mintError, actualMintAmount);
+    }
+
+    function redeemFresh(address payable redeemer, uint redeemTokensIn, uint redeemAmountIn) internal returns (uint) {
+        uint redeemError = super.redeemFresh(redeemer, redeemTokensIn, redeemAmountIn);
+
+        if (redeemError == uint(Error.NO_ERROR)) {
+            notifySavingsChange(redeemer);
+        }
+        return redeemError;
+    }
+
+    function notifySavingsChange(address addr) internal {
+        BencuConfig bencuConfig = Bencutroller(address(comptroller)).bencuConfig();
+        IGaugeController gaugeController = bencuConfig.gaugeController();
+        if (address(gaugeController) != address(0x0)) {
+            gaugeController.notifySavingsChange(addr);
+        }
+    }
+
+    function getBlockNumber() internal view returns (uint) {
+        BencuConfig bencuConfig = Bencutroller(address(comptroller)).bencuConfig();
+        return iOVM_L1BlockNumber(bencuConfig.blockNumber()).getL1BlockNumber();
+    }
+
+    function transferTokens(address spender, address src, address dst, uint tokens) internal returns (uint) {
+        uint errorCode = super.transferTokens(spender, src, dst, tokens);
+        if (errorCode == uint(Error.NO_ERROR)) {
+            notifySavingsChange(src);
+            notifySavingsChange(dst);
+        }
+        return errorCode;
+    }
+
     function seizeInternal(address seizerToken, address liquidator, address borrower, uint seizeTokens) internal returns (uint) {
         /* Fail if seize not allowed */
         uint allowed = comptroller.seizeAllowed(address(this), seizerToken, liquidator, borrower, seizeTokens);
@@ -60,6 +100,10 @@ contract BToken is CToken {
         accountTokens[borrower] = vars.borrowerTokensNew;
         accountTokens[liquidator] = vars.liquidatorTokensNew;
         accountTokens[safetyVault] = vars.safetyVaultTokensNew;
+
+        notifySavingsChange(borrower);
+        notifySavingsChange(liquidator);
+        notifySavingsChange(safetyVault);
 
         /* Emit a Transfer event */
         emit Transfer(borrower, liquidator, vars.liquidatorSeizeTokens);
@@ -132,7 +176,7 @@ contract BToken is CToken {
 
         totalReservesNew = totalReserves - reduceAmount;
         // We checked reduceAmount <= totalReserves above, so this should never revert.
-        require(totalReservesNew <= totalReserves, "reduce reserves unexpected underflow");
+        require(totalReservesNew <= totalReserves);
 
         // Store reserves[n+1] = reserves[n] - reduceAmount
         totalReserves = totalReservesNew;
